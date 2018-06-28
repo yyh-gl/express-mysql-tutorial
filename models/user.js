@@ -1,4 +1,5 @@
-var mysqlConf = require('../database.js').mysql_pool;
+var mysql = require('mysql');
+var db_config = require('../database.js');
 
 // mysqlConf.getConnection(function (err, connection) {
 //   var query = 'SELECT * FROM users WHERE id = ?';
@@ -10,34 +11,37 @@ var mysqlConf = require('../database.js').mysql_pool;
 
 module.exports = {
 
-// emailでusersテーブルを検索する
+  // 「hoge:」 これは関数じゃなくてモジュール定義
+  // IDでusersテーブルを検索する
   getById: function(id) {
-    mysqlConf.getConnection(function (err, connection) {
+    return new Promise((resolve, reject) => {
+      var connection = mysql.createConnection(db_config);
       var query = 'SELECT * FROM users WHERE id = ?';
-      connection.query(query, [1], function (err, row) {
-        console.log(row);
-        return row;
-        connection.release();   //---> don't forget the connection release.
+      connection.query(query, id, function (error, results, fields) {
+        return resolve(results);
       });
     });
   },
 
-  getAllUsers: function() {
-    return new Promise(function(resolve, reject) {
-      mysqlConf.getConnection(function (err, connection) {
-        connection.query('SELECT * FROM users', function (err, rows) {
-          connection.release();   //---> don't forget the connection release.
-        });
+  getAll: function() {
+    return new Promise((resolve, reject) => {
+      var connection = mysql.createConnection(db_config);
+      var query = 'SELECT * FROM users';
+      connection.query(query, function (error, results, fields) {
+        return resolve(results);
       });
     });
   },
 
 // usersテーブルへinsertする
-  register: function(data) {
-    return new Promise(function(resolve, reject) {
-      db.insert("users", data, function(id) {
-        resolve(id);
+  register: function(name, age) {
+    return new Promise((resolve, reject) => {
+      var connection = mysql.createConnection(db_config);
+      var query = "INSERT INTO users (name, age, created_at, updated_at) VALUES (?, ?, NOW(), NOW());";
+      connection.query(query, [name, age], function (error, results, fields) {
+        return resolve(results);
       });
     });
   },
+
 };

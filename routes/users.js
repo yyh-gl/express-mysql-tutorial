@@ -1,25 +1,28 @@
 var express = require('express');
 var router = express.Router();
-var user = require("../models/user.js");
+var userModel = require("../models/user.js");
 
-/* GET users listing. */
-router.get('/db/:id', function(req, res, next) {
-  user.getById(req.params.id)
-    .then(function(row) {
-      if (row) {
-        console.log(row);
-        var param = {"user":row};
-        res.header('Content-Type', 'application/json; charset=utf-8')
-        res.send(param);
-      } else {
-        // 失敗(jsonを返すなど)
-      }
-    });
+
+/* GET /users */
+router.get('/', async function(req, res, next) {
+  var users = await userModel.getAll();
+  var param = { "users": users };
+  res.header('Content-Type', 'application/json; charset=utf-8')
+  res.send(param);
 });
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  var param = {"値":"これはサンプルAPIです"};
+/* GET /users/:id */
+router.get('/:id', async function(req, res, next) {
+  var user = await userModel.getById(req.params.id);
+  var param = { "user": user };
+  res.header('Content-Type', 'application/json; charset=utf-8')
+  res.send(param);
+});
+
+/* POST /users */
+router.post('/', async function(req, res, next) {
+  var user = await userModel.register(req.body.name, req.body.age);
+  var param = { "user": user };
   res.header('Content-Type', 'application/json; charset=utf-8')
   res.send(param);
 });
